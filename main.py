@@ -5,7 +5,7 @@ from telegram.ext import (Application, CommandHandler, CallbackQueryHandler,
                           MessageHandler, ConversationHandler, filters, ContextTypes)
 
 TOKEN = "8711482972:AAHj8hgs_Sv571J6BdfQP7QzpCqyJIN3VwM"
-ADMIN_CHAT_ID = None  # Run /myid in the bot to get your ID, then set it here
+ADMIN_CHAT_ID =1712113435  # Run /myid in the bot to get your ID, then set it here
 logging.basicConfig(level=logging.INFO)
 
 # Conversation states for application form
