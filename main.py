@@ -1,37 +1,45 @@
 # -*- coding: utf-8 -*-
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import (Application, CommandHandler, CallbackQueryHandler,
+                          MessageHandler, ConversationHandler, filters, ContextTypes)
 
 TOKEN = "8711482972:AAHj8hgs_Sv571J6BdfQP7QzpCqyJIN3VwM"
+ADMIN_CHAT_ID = None  # Run /myid in the bot to get your ID, then set it here
 logging.basicConfig(level=logging.INFO)
 
+# Conversation states for application form
+APPLY_NAME, APPLY_PLATFORM, APPLY_REVENUE, APPLY_DURATION, APPLY_WHY = range(5)
+
 # Unicode escapes - immune to encoding issues
-WAVE    = "\U0001F44B"   # üëã
-BLACK   = "\U0001F5A4"   # üñ§
-FINGER  = "\U0001F447"   # üëá
-FAQ_ICO = "\U0001F4CB"   # üìã
-BRIEF   = "\U0001F4BC"   # üíº
-CHART   = "\U0001F4C8"   # üìà
-ROCKET  = "\U0001F680"   # üöÄ
-BACK    = "\U0001F519"   # üîô
-QUEST   = "\u2753"       # ‚ùì
-MONEY   = "\U0001F4B0"   # üí∞
-LOCK    = "\U0001F510"   # üîê
-RED     = "\U0001F534"   # üî¥
-CAMERA  = "\U0001F4F8"   # üì∏
-BUBBLE  = "\U0001F4AC"   # üí¨
-FR_FLAG = "\U0001F1EB\U0001F1F7"  # üá´üá∑
-GB_FLAG = "\U0001F1EC\U0001F1E7"  # üá¨üáß
-GEAR    = "\u2699\uFE0F"  # ‚öôÔ∏è
-PHONE   = "\U0001F4F1"   # üì±
-STATS   = "\U0001F4CA"   # üìä
-CHECK   = "\u2705"       # ‚úÖ
-HANDS   = "\U0001F91D"   # ü§ù
-ONE     = "1\uFE0F\u20E3"  # 1Ô∏è‚É£
-TWO     = "2\uFE0F\u20E3"  # 2Ô∏è‚É£
-THREE   = "3\uFE0F\u20E3"  # 3Ô∏è‚É£
-FOUR    = "4\uFE0F\u20E3"  # 4Ô∏è‚É£
+WAVE    = "\U0001F44B"
+BLACK   = "\U0001F5A4"
+FINGER  = "\U0001F447"
+FAQ_ICO = "\U0001F4CB"
+BRIEF   = "\U0001F4BC"
+CHART   = "\U0001F4C8"
+ROCKET  = "\U0001F680"
+BACK    = "\U0001F519"
+QUEST   = "\u2753"
+MONEY   = "\U0001F4B0"
+LOCK    = "\U0001F510"
+RED     = "\U0001F534"
+CAMERA  = "\U0001F4F8"
+BUBBLE  = "\U0001F4AC"
+FR_FLAG = "\U0001F1EB\U0001F1F7"
+GB_FLAG = "\U0001F1EC\U0001F1E7"
+GEAR    = "\u2699\uFE0F"
+PHONE   = "\U0001F4F1"
+STATS   = "\U0001F4CA"
+CHECK   = "\u2705"
+HANDS   = "\U0001F91D"
+ONE     = "1\uFE0F\u20E3"
+TWO     = "2\uFE0F\u20E3"
+THREE   = "3\uFE0F\u20E3"
+FOUR    = "4\uFE0F\u20E3"
+FORM    = "\U0001F4DD"
+STAR    = "\u2B50"
+FIRE    = "\U0001F525"
 
 def get_lang(update: Update) -> str:
     lang = update.effective_user.language_code or "en"
@@ -46,6 +54,7 @@ def main_keyboard(lang):
          InlineKeyboardButton(t(f"{BRIEF} Nos Services", f"{BRIEF} Our Services", lang), callback_data=f"services|{lang}")],
         [InlineKeyboardButton(t(f"{CHART} Nos Resultats", f"{CHART} Our Results", lang), callback_data=f"results|{lang}"),
          InlineKeyboardButton(t(f"{ROCKET} Rejoindre l'agence", f"{ROCKET} Join the Agency", lang), callback_data=f"join|{lang}")],
+        [InlineKeyboardButton(t(f"{FORM} Postuler maintenant", f"{FORM} Apply Now", lang), callback_data=f"apply|{lang}")],
         [InlineKeyboardButton(t(f"{GB_FLAG} Switch to English", f"{FR_FLAG} Passer en Francais", lang),
                               callback_data=f"switch|{'en' if lang == 'fr' else 'fr'}")],
     ])
@@ -60,6 +69,10 @@ def main_text(lang):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = get_lang(update)
     await update.message.reply_text(main_text(lang), reply_markup=main_keyboard(lang), parse_mode=None)
+
+async def myid_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_user.id
+    await update.message.reply_text(f"Ton Telegram ID est: {chat_id}\n\nMets ce numero dans ADMIN_CHAT_ID du bot.")
 
 async def switch_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -183,6 +196,122 @@ async def join_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=keyboard, parse_mode=None
     )
 
+# ‚îÄ‚îÄ‚îÄ APPLICATION FORM ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
+
+async def apply_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    lang = query.data.split("|")[1]
+    context.user_data['lang'] = lang
+    context.user_data['apply'] = {}
+    await query.message.reply_text(
+        t(
+            f"{FORM} Candidature Seven Agency\n\nSuper ! Quelques questions rapides.\n\nQuestion 1/5\nQuel est ton prenom ?",
+            f"{FORM} Seven Agency Application\n\nGreat! Just a few quick questions.\n\nQuestion 1/5\nWhat is your first name?",
+            lang
+        ),
+        parse_mode=None
+    )
+    return APPLY_NAME
+
+async def apply_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    lang = context.user_data.get('lang', 'en')
+    context.user_data['apply']['name'] = update.message.text
+    await update.message.reply_text(
+        t(
+            f"Question 2/5\nQuel est le lien de ton profil OnlyFans ?",
+            f"Question 2/5\nWhat is your OnlyFans profile link?",
+            lang
+        ),
+        parse_mode=None
+    )
+    return APPLY_PLATFORM
+
+async def apply_platform(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    lang = context.user_data.get('lang', 'en')
+    context.user_data['apply']['platform'] = update.message.text
+    await update.message.reply_text(
+        t(
+            f"Question 3/5\nQuels sont tes revenus mensuels actuels sur OnlyFans ?\n(ex: 500$, 1000$, 2000$...)",
+            f"Question 3/5\nWhat is your current monthly revenue on OnlyFans?\n(e.g. $500, $1000, $2000...)",
+            lang
+        ),
+        parse_mode=None
+    )
+    return APPLY_REVENUE
+
+async def apply_revenue(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    lang = context.user_data.get('lang', 'en')
+    context.user_data['apply']['revenue'] = update.message.text
+    await update.message.reply_text(
+        t(
+            f"Question 4/5\nDepuis combien de temps tu es sur OnlyFans ?",
+            f"Question 4/5\nHow long have you been on OnlyFans?",
+            lang
+        ),
+        parse_mode=None
+    )
+    return APPLY_DURATION
+
+async def apply_duration(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    lang = context.user_data.get('lang', 'en')
+    context.user_data['apply']['duration'] = update.message.text
+    await update.message.reply_text(
+        t(
+            f"Question 5/5\nPourquoi tu veux travailler avec Seven Agency ?",
+            f"Question 5/5\nWhy do you want to work with Seven Agency?",
+            lang
+        ),
+        parse_mode=None
+    )
+    return APPLY_WHY
+
+async def apply_why(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    lang = context.user_data.get('lang', 'en')
+    context.user_data['apply']['why'] = update.message.text
+    data = context.user_data['apply']
+    user = update.effective_user
+
+    # Confirm to applicant
+    await update.message.reply_text(
+        t(
+            f"{CHECK} Candidature envoyee {FIRE}\n\nOn te recontacte sous 24h.\n\nEn attendant, rejoins notre canal :\nt.me/seven_agency_ofm",
+            f"{CHECK} Application sent {FIRE}\n\nWe will get back to you within 24h.\n\nMeanwhile, join our channel:\nt.me/seven_agency_ofm",
+            lang
+        ),
+        reply_markup=main_keyboard(lang),
+        parse_mode=None
+    )
+
+    # Send dossier to admin
+    if ADMIN_CHAT_ID:
+        username = f"@{user.username}" if user.username else f"ID: {user.id}"
+        summary = (
+            f"{STAR}{STAR} NOUVELLE CANDIDATURE {STAR}{STAR}\n\n"
+            f"{FORM} Prenom: {data.get('name', 'N/A')}\n"
+            f"{CAMERA} Profil OF: {data.get('platform', 'N/A')}\n"
+            f"{MONEY} Revenus actuels: {data.get('revenue', 'N/A')}\n"
+            f"{CHART} Anciennete: {data.get('duration', 'N/A')}\n"
+            f"{BUBBLE} Motivation: {data.get('why', 'N/A')}\n\n"
+            f"Telegram: {username}"
+        )
+        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=summary, parse_mode=None)
+
+    context.user_data.pop('apply', None)
+    return ConversationHandler.END
+
+async def apply_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    lang = context.user_data.get('lang', 'en')
+    context.user_data.pop('apply', None)
+    await update.message.reply_text(
+        t("Candidature annulee.", "Application cancelled.", lang),
+        reply_markup=main_keyboard(lang),
+        parse_mode=None
+    )
+    return ConversationHandler.END
+
+# ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
+
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = get_lang(update)
     await update.message.reply_text(
@@ -193,7 +322,23 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(TOKEN).build()
+
+    # Application form conversation
+    apply_conv = ConversationHandler(
+        entry_points=[CallbackQueryHandler(apply_start, pattern=r"^apply\|")],
+        states={
+            APPLY_NAME:     [MessageHandler(filters.TEXT & ~filters.COMMAND, apply_name)],
+            APPLY_PLATFORM: [MessageHandler(filters.TEXT & ~filters.COMMAND, apply_platform)],
+            APPLY_REVENUE:  [MessageHandler(filters.TEXT & ~filters.COMMAND, apply_revenue)],
+            APPLY_DURATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, apply_duration)],
+            APPLY_WHY:      [MessageHandler(filters.TEXT & ~filters.COMMAND, apply_why)],
+        },
+        fallbacks=[CommandHandler("cancel", apply_cancel)],
+    )
+
+    app.add_handler(apply_conv)
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("myid", myid_handler))
     app.add_handler(CallbackQueryHandler(switch_handler, pattern=r"^switch\|"))
     app.add_handler(CallbackQueryHandler(menu_handler, pattern=r"^menu\|"))
     app.add_handler(CallbackQueryHandler(faq_handler, pattern=r"^faq\|"))
@@ -205,6 +350,8 @@ def main():
     app.add_handler(CallbackQueryHandler(services_handler, pattern=r"^services\|"))
     app.add_handler(CallbackQueryHandler(results_handler, pattern=r"^results\|"))
     app.add_handler(CallbackQueryHandler(join_handler, pattern=r"^join\|"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
+
     print("Seven Agency Bot is running...")
     app.run_polling()
 
