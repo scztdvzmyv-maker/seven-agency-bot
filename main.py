@@ -86,8 +86,8 @@ async def faq_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(t(f"{BACK} Retour", f"{BACK} Back", lang), callback_data=f"menu|{lang}")],
     ])
     await query.edit_message_text(
-        t(f"{FAQ_ICO} FAQ ‚Äî Seven Agency\n\nChoisis ta question {FINGER}",
-          f"{FAQ_ICO} FAQ ‚Äî Seven Agency\n\nChoose your question {FINGER}", lang),
+        t(f"{FAQ_ICO} FAQ  -  Seven Agency\n\nChoisis ta question {FINGER}",
+          f"{FAQ_ICO} FAQ  -  Seven Agency\n\nChoose your question {FINGER}", lang),
         reply_markup=keyboard, parse_mode=None
     )
 
@@ -130,8 +130,8 @@ async def faq_how(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = query.data.split("|")[1]
     back = InlineKeyboardMarkup([[InlineKeyboardButton(t(f"{BACK} Retour FAQ", f"{BACK} Back to FAQ", lang), callback_data=f"faq|{lang}")]])
     await query.edit_message_text(
-        t(f"{GEAR} Comment ca fonctionne ?\n\nOn s'occupe de tout pour que tu te concentres 100% sur la creation.\n\n{BUBBLE} Messages & DMs ‚Äî on repond a tes fans 24h/24\n{MONEY} Strategie PPV ‚Äî on envoie le bon contenu au bon moment\n{PHONE} Marketing ‚Äî on fait grandir ton audience sur Instagram & TikTok\n{STATS} Analytics ‚Äî on suit tes stats et optimise chaque semaine\n{LOCK} Protection du contenu ‚Äî ton contenu reste en securite\n\nToi tu crees. On gere le reste. {BLACK}",
-          f"{GEAR} How Does It Work?\n\nWe take care of everything so you can focus 100% on creating.\n\n{BUBBLE} Fan Messaging & DMs ‚Äî we reply to your fans 24/7\n{MONEY} PPV Strategy ‚Äî we send the right content at the right time\n{PHONE} Marketing ‚Äî we grow your audience on Instagram & TikTok\n{STATS} Analytics ‚Äî we track your stats and optimize every week\n{LOCK} Content Protection ‚Äî your content stays safe\n\nYou create. We handle the rest. {BLACK}", lang),
+        t(f"{GEAR} Comment ca fonctionne ?\n\nOn s'occupe de tout pour que tu te concentres 100% sur la creation.\n\n{BUBBLE} Messages & DMs  -  on repond a tes fans 24h/24\n{MONEY} Strategie PPV  -  on envoie le bon contenu au bon moment\n{PHONE} Marketing  -  on fait grandir ton audience sur Instagram & TikTok\n{STATS} Analytics  -  on suit tes stats et optimise chaque semaine\n{LOCK} Protection du contenu  -  ton contenu reste en securite\n\nToi tu crees. On gere le reste. {BLACK}",
+          f"{GEAR} How Does It Work?\n\nWe take care of everything so you can focus 100% on creating.\n\n{BUBBLE} Fan Messaging & DMs  -  we reply to your fans 24/7\n{MONEY} PPV Strategy  -  we send the right content at the right time\n{PHONE} Marketing  -  we grow your audience on Instagram & TikTok\n{STATS} Analytics  -  we track your stats and optimize every week\n{LOCK} Content Protection  -  your content stays safe\n\nYou create. We handle the rest. {BLACK}", lang),
         reply_markup=back, parse_mode=None
     )
 
@@ -141,8 +141,8 @@ async def faq_free(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = query.data.split("|")[1]
     back = InlineKeyboardMarkup([[InlineKeyboardButton(t(f"{BACK} Retour FAQ", f"{BACK} Back to FAQ", lang), callback_data=f"faq|{lang}")]])
     await query.edit_message_text(
-        t(f"{CHECK} C'est gratuit pour commencer ?\n\nOui ‚Äî aucun frais fixe.\n\nOn prend uniquement une commission sur les revenus.\nSi on te rapporte rien, on prend rien. {HANDS}",
-          f"{CHECK} Is It Free To Start?\n\nYes ‚Äî no fixed fees.\n\nWe only take a commission on revenue.\nIf we don't make you money, we don't get paid. {HANDS}", lang),
+        t(f"{CHECK} C'est gratuit pour commencer ?\n\nOui  -  aucun frais fixe.\n\nOn prend uniquement une commission sur les revenus.\nSi on te rapporte rien, on prend rien. {HANDS}",
+          f"{CHECK} Is It Free To Start?\n\nYes  -  no fixed fees.\n\nWe only take a commission on revenue.\nIf we don't make you money, we don't get paid. {HANDS}", lang),
         reply_markup=back, parse_mode=None
     )
 
@@ -152,8 +152,8 @@ async def services_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = query.data.split("|")[1]
     back = InlineKeyboardMarkup([[InlineKeyboardButton(t(f"{BACK} Retour", f"{BACK} Back", lang), callback_data=f"menu|{lang}")]])
     await query.edit_message_text(
-        t(f"{BRIEF} Nos Services\n\n{RED} Gestion DMs & fans ‚Äî 24h/24\n{RED} Strategie PPV ‚Äî maximisation des revenus\n{RED} Marketing Instagram & TikTok\n{RED} Analyse des stats\n{RED} Protection du contenu\n{RED} Onboarding complet\n\nToi tu crees. On gere le reste. {BLACK}",
-          f"{BRIEF} Our Services\n\n{RED} DMs & Fan Management ‚Äî 24/7\n{RED} PPV Strategy ‚Äî revenue maximization\n{RED} Instagram & TikTok Marketing\n{RED} Stats Analysis\n{RED} Content Protection\n{RED} Full Onboarding\n\nYou create. We handle the rest. {BLACK}", lang),
+        t(f"{BRIEF} Nos Services\n\n{RED} Gestion DMs & fans  -  24h/24\n{RED} Strategie PPV  -  maximisation des revenus\n{RED} Marketing Instagram & TikTok\n{RED} Analyse des stats\n{RED} Protection du contenu\n{RED} Onboarding complet\n\nToi tu crees. On gere le reste. {BLACK}",
+          f"{BRIEF} Our Services\n\n{RED} DMs & Fan Management  -  24/7\n{RED} PPV Strategy  -  revenue maximization\n{RED} Instagram & TikTok Marketing\n{RED} Stats Analysis\n{RED} Content Protection\n{RED} Full Onboarding\n\nYou create. We handle the rest. {BLACK}", lang),
         reply_markup=back, parse_mode=None
     )
 
